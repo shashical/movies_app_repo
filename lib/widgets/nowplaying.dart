@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:movies_app/utils/textstyle.dart';
+import 'package:movies_app/widgets/movie_info.dart';
 
 class NowPlayingMovies extends StatelessWidget {
   final List nowplaying;
@@ -25,7 +26,14 @@ class NowPlayingMovies extends StatelessWidget {
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) => InkWell(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => InfoScreen(
+                                                movie: nowplaying[index],
+                                                  )));
+                },
                 child: Container(
                   width: 140,
                   child: Column(children: [

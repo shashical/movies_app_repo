@@ -2,12 +2,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:movies_app/login.dart';
 import 'package:movies_app/main.dart';
 import 'package:movies_app/utils/textstyle.dart';
 import 'package:movies_app/widgets/nowplaying.dart';
+import 'package:movies_app/widgets/search_page.dart';
 import 'package:movies_app/widgets/toprated.dart';
 import 'package:tmdb_api/tmdb_api.dart';
 import 'package:movies_app/widgets/trending.dart';
+
+TMDB? tmdbWithCustomLogs;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,14 +34,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   load_data()async{
-    TMDB  tmdbWithCustomLogs = TMDB(ApiKeys(apikey,token),
+    tmdbWithCustomLogs = TMDB(ApiKeys(apikey,token),
     logConfig: ConfigLogger(
       showErrorLogs: true,
       showLogs: true,
       ));
-      Map trendingres= await tmdbWithCustomLogs.v3.trending.getTrending();
-      Map topratedres= await tmdbWithCustomLogs.v3.movies.getTopRated();
-      Map nowplayingres= await tmdbWithCustomLogs.v3.movies.getNowPlaying();
+      Map trendingres= await tmdbWithCustomLogs!.v3.trending.getTrending();
+      Map topratedres= await tmdbWithCustomLogs!.v3.movies.getTopRated();
+      Map nowplayingres= await tmdbWithCustomLogs!.v3.movies.getNowPlaying();
       setState(() {
         trending_movies=trendingres['results'];
         toprated_movies=topratedres['results'];
@@ -51,9 +55,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 20, 20, 20),
       appBar: AppBar(
+          actions: [
+            IconButton(onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: 
+              (context) {
+                return SearchScreen();
+              },));
+            }, icon: Icon(Icons.search)),
+          ],
           backgroundColor: Color.fromARGB(255, 207, 8, 151),
           automaticallyImplyLeading: false,
-          title: Center(child: new_text(text:'Movies'))),
+          centerTitle: true,
+          title: new_text(text:'Movies')),
         body: ListView(
           children:[
             TrendingMovies(trending:trending_movies),
@@ -64,11 +77,13 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           FirebaseAuth.instance.signOut().then((value) {
-            Navigator.push(
+            Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => MyApp(),
-                ));
+                  builder: (context) => LoginPage(),
+                ),
+                ModalRoute.withName('/'),
+                );
             print("Signed out");
           });
         },
